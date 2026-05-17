@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useOrdenAmasado } from "../context/OrdenAmasadoContext";
 import Torre from "../components/Torre";
+import { guardarTorresParaProduccion } from "../utils/torresUtils";
 
 const getCurrentData = () => {
   const now = new Date();
@@ -82,14 +83,19 @@ export default function OrdenAmasado() {
     });
   };
 
+  // Función para manejar el envío de torres a producción
+  // Las torres enviadas aparecerán inmediatamente en Control de Producción
   const handleEnviarProduccion = (idx) => {
     setTorres((prev) => {
       const updated = [...prev];
       updated[idx] = {
         ...updated[idx],
         enviada: true,
+        fechaEnvio: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
       };
       localStorage.setItem("amasado_torres", JSON.stringify(updated));
+      // Guardar también en localStorage para Control de Producción usando la función utilitaria
+      guardarTorresParaProduccion(updated, orden, TORRE_BOLAS);
       return updated;
     });
   };
@@ -105,6 +111,9 @@ export default function OrdenAmasado() {
         },
       };
       localStorage.setItem("amasado_torres", JSON.stringify(updated));
+      // Guardar también en localStorage para Control de Producción
+      // Las torres finalizadas estarán disponibles al día siguiente (00:00)
+      guardarTorresParaProduccion(updated, orden, TORRE_BOLAS);
       return updated;
     });
   };

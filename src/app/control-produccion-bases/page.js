@@ -1,22 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-
-// Utilidad para obtener las torres desde localStorage
-function getTorresParaProduccion() {
-  const data = localStorage.getItem("torresAmasado");
-  if (!data) return [];
-  const torres = JSON.parse(data);
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  return torres.filter((torre) => {
-    if (torre.enviada) return true;
-    if (!torre.fechaAmasado) return false;
-    const fechaAmasado = new Date(torre.fechaAmasado);
-    fechaAmasado.setHours(0, 0, 0, 0);
-    // Mostrar si la fecha de amasado es anterior al día actual (día siguiente)
-    return fechaAmasado < hoy;
-  });
-}
+import { getTorresParaProduccion } from "../utils/torresUtils";
 
 export default function ControlProduccionBases() {
   const [torres, setTorres] = useState([]);
