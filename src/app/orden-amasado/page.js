@@ -15,19 +15,22 @@ const getCurrentData = () => {
 
 export default function OrdenAmasado() {
   const { bolasAmasado, setBolasAmasado } = useOrdenAmasado();
-  // Estado inicial desde localStorage si existe
-  const [bolas, setBolas] = useState(() => {
-    const saved = localStorage.getItem("amasado_bolas");
-    return saved ? JSON.parse(saved) : (bolasAmasado || 0);
-  });
-  const [orden, setOrden] = useState(() => {
-    const saved = localStorage.getItem("amasado_orden");
-    return saved ? JSON.parse(saved) : (bolasAmasado > 0 ? { bolas: bolasAmasado } : null);
-  });
-  const [torres, setTorres] = useState(() => {
-    const saved = localStorage.getItem("amasado_torres");
-    return saved ? JSON.parse(saved) : [];
-  });
+  // Estado inicial vacío, se carga desde localStorage en el cliente
+  const [bolas, setBolas] = useState(bolasAmasado || 0);
+  const [orden, setOrden] = useState(bolasAmasado > 0 ? { bolas: bolasAmasado } : null);
+  const [torres, setTorres] = useState([]);
+  const [mounted, setMounted] = useState(false);
+
+  // Cargar datos desde localStorage solo en el cliente
+  useEffect(() => {
+    setMounted(true);
+    const savedBolas = localStorage.getItem("amasado_bolas");
+    const savedOrden = localStorage.getItem("amasado_orden");
+    const savedTorres = localStorage.getItem("amasado_torres");
+    if (savedBolas) setBolas(JSON.parse(savedBolas));
+    if (savedOrden) setOrden(JSON.parse(savedOrden));
+    if (savedTorres) setTorres(JSON.parse(savedTorres));
+  }, []);
 
 
   const TORRE_BOLAS = 200;
@@ -142,7 +145,10 @@ export default function OrdenAmasado() {
   return (
     <div className="container py-4">
       <h1 className="mb-4 text-center">Orden de Amasado de Bolas</h1>
-      {(!orden || !orden.bolas) && (
+      {!mounted && (
+        <div className="alert alert-info">Cargando...</div>
+      )}
+      {mounted && !orden && (
         <form className="mb-4" onSubmit={handleSubmit}>
           <div className="input-group mb-3">
             <span className="input-group-text">Nº de bolas a amasar</span>
@@ -160,7 +166,7 @@ export default function OrdenAmasado() {
           </div>
         </form>
       )}
-      {orden && orden.bolas > 0 && (
+      {mounted && orden && orden.bolas > 0 && (
         <>
           <div className="d-flex justify-content-between align-items-center mb-3">
             <div className="alert alert-warning text-center fw-bold grow mb-0" role="alert">
